@@ -1,0 +1,31 @@
+name: Save Webcam Image
+
+on:
+  schedule:
+    - cron: "*/60 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Scarica immagine webcam
+        run: |
+          mkdir -p webcam
+          ts=$(date +"%Y-%m-%d_%H-%M")
+          curl -L -o "webcam/webcam_${ts}.jpg" "https://intercom.it/webcams/talonno"
+
+      - name: Commit & Push image
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+          git add webcam/
+          git commit -m "New webcam image at $(date)" || exit 0
+          git push
